@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Avançado - Teorias da Administração</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+    }
+    .quiz-container {
+      max-width: 800px;
+      margin: auto;
+      background-color: #fff;
+      padding: 25px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #222;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      margin-bottom: 20px;
+    }
+    .question {
+      margin-bottom: 22px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .question h3 {
+      margin-bottom: 10px;
+      font-weight: 600;
+      font-size: 1.1em;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.95em;
+      color: #555;
+    }
+    input[type="radio"] {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 12px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      margin-right: 12px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 30px;
+      font-weight: 700;
+      font-size: 1.2em;
+      color: #222;
+    }
+    .wrong {
+      color: #c0392b;
+      font-weight: 600;
+      margin-top: 6px;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h2>Quiz Avançado - Teorias da Administração</h2>
+    <select id="tema-select" onchange="renderQuestions()">
+      <option value="">Selecione o tema</option>
+      <option value="I">Unidade I - Abordagens Clássicas</option>
+      <option value="II">Unidade II - Relações Humanas</option>
+      <option value="III">Unidade III - Teorias Comportamentais</option>
+      <option value="IV">Unidade IV - Estrutura Organizacional</option>
+      <option value="V">Unidade V - Administração por Objetivos</option>
+    </select>
+    <div id="questions"></div>
+    <div style="text-align:center; margin-top: 25px;">
+      <button onclick="checkAnswers()">Verificar Respostas</button>
+      <button onclick="resetQuiz()">Limpar Respostas</button>
+    </div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const allQuestions = [
+      { tema: "I", q: "Quem é considerado o pai da Administração Científica?", options: ["Henri Fayol", "Frederick Taylor", "Max Weber", "Peter Drucker"], correct: "Frederick Taylor" },
+      { tema: "I", q: "Qual é a ênfase principal da Teoria Clássica da Administração?", options: ["Relações humanas", "Eficiência e divisão do trabalho", "Ambiente externo", "Motivação pessoal"], correct: "Eficiência e divisão do trabalho" },
+      { tema: "I", q: "Qual conceito Henri Fayol não incluiu em suas funções administrativas?", options: ["Planejar", "Controlar", "Innovar", "Organizar"], correct: "Innovar" },
+      { tema: "I", q: "Qual é a função principal da 'coordenação' na administração clássica?", options: ["Delegar tarefas", "Garantir que atividades estejam harmonizadas", "Supervisionar operários", "Planejar estratégias"], correct: "Garantir que atividades estejam harmonizadas" },
+      { tema: "I", q: "Qual o principal foco da Administração Científica de Taylor?", options: ["Motivação", "Estudo e padronização do trabalho", "Relações humanas", "Comunicação"], correct: "Estudo e padronização do trabalho" },
+      { tema: "II", q: "Qual autor desenvolveu a Teoria X e Teoria Y sobre comportamento humano?", options: ["Douglas McGregor", "Elton Mayo", "Abraham Maslow", "Chris Argyris"], correct: "Douglas McGregor" },
+      { tema: "II", q: "Quem desenvolveu a Hierarquia das Necessidades?", options: ["Douglas McGregor", "Abraham Maslow", "Frederick Taylor", "Max Weber"], correct: "Abraham Maslow" },
+      { tema: "II", q: "Qual é a crítica principal à Teoria das Relações Humanas?", options: ["Ignorar aspectos técnicos", "Focar só em processos", "Ênfase excessiva na tecnologia", "Ignorar a motivação"], correct: "Ignorar aspectos técnicos" },
+      { tema: "II", q: "Qual é o papel da comunicação na Teoria das Relações Humanas?", options: ["É secundário", "Fundamental para motivação e produtividade", "Só para informar ordens", "Não é considerada"], correct: "Fundamental para motivação e produtividade" },
+      { tema: "III", q: "O que caracteriza a Teoria Comportamental?", options: ["Foco em regras e processos", "Ênfase em aspectos humanos e motivacionais", "Foco exclusivo em eficiência técnica", "Negligência das pessoas"], correct: "Ênfase em aspectos humanos e motivacionais" },
+      { tema: "III", q: "Segundo Chris Argyris, qual é a característica do 'adulto maduro' no trabalho?", options: ["Passividade", "Autonomia e responsabilidade", "Dependência do supervisor", "Resistência à mudança"], correct: "Autonomia e responsabilidade" },
+      { tema: "III", q: "Qual das alternativas define melhor o conceito de 'empowerment'?", options: ["Centralização do poder", "Dar autonomia e responsabilidade aos funcionários", "Controle rigoroso", "Reforço hierárquico"], correct: "Dar autonomia e responsabilidade aos funcionários" },
+      { tema: "III", q: "Qual é o conceito de 'liderança transformacional'?", options: ["Controle rígido e ordens", "Inspirar e motivar mudanças", "Focar só em processos", "Evitar mudanças"], correct: "Inspirar e motivar mudanças" },
+      { tema: "IV", q: "Segundo Max Weber, qual característica NÃO é típica da burocracia?", options: ["Hierarquia clara", "Regras escritas", "Flexibilidade de funções", "Impersonalidade"], correct: "Flexibilidade de funções" },
+      { tema: "IV", q: "O que é a Teoria da Burocracia segundo Max Weber?", options: ["Gestão por exceção", "Administração baseada em regras e hierarquia", "Teoria motivacional", "Teoria de sistemas"], correct: "Administração baseada em regras e hierarquia" },
+      { tema: "IV", q: "Qual autor enfatizou o conceito de 'autoridade legítima'?", options: ["Max Weber", "Henri Fayol", "Frederick Taylor", "Douglas McGregor"], correct: "Max Weber" },
+      { tema: "IV", q: "Qual é a crítica à abordagem burocrática nas organizações modernas?", options: ["Falta de regras claras", "Excesso de rigidez e lentidão", "Foco em pessoas e não em processos", "Pouca formalidade"], correct: "Excesso de rigidez e lentidão" },
+      { tema: "IV", q: "O que representa o conceito de 'estrutura matricial' nas organizações?", options: ["Hierarquia única", "Combinação de estrutura funcional e por projetos", "Gestão por processos", "Nenhuma dessas"], correct: "Combinação de estrutura funcional e por projetos" },
+      { tema: "V", q: "O que define a Administração por Objetivos (APO)?", options: ["Metas definidas centralmente", "Envolvimento do subordinado na definição de metas", "Controle rígido de tarefas", "Foco só na produção"], correct: "Envolvimento do subordinado na definição de metas" },
+      { tema: "V", q: "Quem é Peter Drucker no contexto da administração?", options: ["Pai da Administração Científica", "Criador da APO e guru da administração moderna", "Fundador da Teoria das Relações Humanas", "Principal teórico da burocracia"], correct: "Criador da APO e guru da administração moderna" }
+    ];
+
+    function renderQuestions() {
+      const tema = document.getElementById("tema-select").value;
+      const container = document.getElementById("questions");
+      container.innerHTML = "";
+      const filtered = allQuestions.filter(q => q.tema === tema);
+
+      filtered.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `<h3>${index + 1}. ${item.q}</h3>` +
+          item.options.map(opt => `
+            <label>
+              <input type="radio" name="q${index + 1}" value="${opt}" />
+              ${opt}
+            </label>
+          `).join("");
+        container.appendChild(div);
+      });
+
+      document.getElementById("result").textContent = "";
+    }
+
+    function checkAnswers() {
+      const tema = document.getElementById("tema-select").value;
+      const filtered = allQuestions.filter(q => q.tema === tema);
+      const container = document.getElementById("questions");
+      let score = 0;
+      filtered.forEach((item, index) => {
+        const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+        const div = container.children[index];
+        const prevWrong = div.querySelector(".wrong");
+        if (prevWrong) prevWrong.remove();
+        if (selected && selected.value === item.correct) {
+          score++;
+        } else {
+          const wrongMsg = document.createElement("div");
+          wrongMsg.className = "wrong";
+          wrongMsg.textContent = `Resposta correta: ${item.correct}`;
+          div.appendChild(wrongMsg);
+        }
+      });
+      document.getElementById("result").textContent = `Você acertou ${score} de ${filtered.length} questões.`;
+      document.getElementById("result").scrollIntoView({behavior: "smooth"});
+    }
+
+    function resetQuiz() {
+      const tema = document.getElementById("tema-select").value;
+      const filtered = allQuestions.filter(q => q.tema === tema);
+      const container = document.getElementById("questions");
+      filtered.forEach((_, index) => {
+        const selected = document.querySelector(`input[name="q${index + 1}"]:checked`);
+        if (selected) selected.checked = false;
+        const div = container.children[index];
+        const prevWrong = div.querySelector(".wrong");
+        if (prevWrong) prevWrong.remove();
+      });
+      document.getElementById("result").textContent = "";
+    }
+  </script>
+</body>
+</html>
